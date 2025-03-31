@@ -14,8 +14,11 @@ import {
 import { columns, SplashTableData, SplashTableUpdateData } from "./columns";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/Icons";
+import { useSearchParams } from "next/navigation";
+import { FormSchemaType } from "..";
 
 const TableContainer = ({ data }: { data: SplashTableData[] }) => {
+  const params = useSearchParams();
   const [tableData, setTableData] = useState<SplashTableData[]>(data);
   const tableRef = useRef<DataTableRef<SplashTableData>>(null);
   const [rowCount, setRowCount] = useState<number>(tableData.length);
@@ -49,7 +52,17 @@ const TableContainer = ({ data }: { data: SplashTableData[] }) => {
   const handleDataDelete = async (id: string) => {
     try {
       const res = await splashApi.deleteSplash(id);
-      setTableData(res);
+      if (res.success) {
+        const query = {
+          category: params.get("category") ?? "email",
+          keyword: params.get("keyword") ?? "",
+          status: params.get("status") ?? "all",
+        } as FormSchemaType;
+        const data = await splashApi.getSplash(query);
+        setTableData(data);
+      } else {
+        setTableData([]);
+      }
     } catch (error) {
       console.error("Failed to delete status:", error);
     }

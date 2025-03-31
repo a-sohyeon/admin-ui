@@ -5,14 +5,8 @@ import { Button } from "@/components/ui/button";
 import { UseFormReturn } from "react-hook-form";
 import { FormSchemaType } from "../index";
 import { Form } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useState } from "react";
+import { useRouter } from "next/router";
+import FormFieldSelect from "@/components/Form/FormFieldSelect";
 
 const FormLow = ({
   children,
@@ -26,19 +20,22 @@ const FormLow = ({
       <p className="text-gray-9 text-[1.4rem] font-bold min-w-[11.3rem]">
         {label}
       </p>
-      {children}
+      <div className="flex items-start w-full gap-[.8rem]">{children}</div>
     </div>
   );
 };
 
-const FormContainer = ({
-  form,
-  handleSubmit,
-}: {
-  form: UseFormReturn<FormSchemaType>;
-  handleSubmit: (data: FormSchemaType) => void;
-}) => {
-  const [searchType, setSearchType] = useState<string>("email");
+const FormContainer = ({ form }: { form: UseFormReturn<FormSchemaType> }) => {
+  const router = useRouter();
+  const handleSubmit = (data: FormSchemaType) => {
+    const params = new URLSearchParams();
+    Object.entries(data).forEach(([key, value]) => {
+      if (value) {
+        params.set(key, value);
+      }
+    });
+    router.replace(`/app/splash?${params.toString()}`);
+  };
 
   return (
     <Form {...form}>
@@ -48,30 +45,22 @@ const FormContainer = ({
       >
         <div className="flex flex-col gap-[1.6rem] w-full">
           <FormLow label="검색어">
-            <Select
-              onValueChange={(value) => setSearchType(value)}
-              defaultValue={searchType}
-              onOpenChange={(open) => {
-                if (open) {
-                  form.setValue("email", "");
-                  form.setValue("name", "");
-                }
-              }}
-            >
-              <SelectTrigger className="max-w-[10rem]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="email">이메일</SelectItem>
-                <SelectItem value="name">이름</SelectItem>
-              </SelectContent>
-            </Select>
+            <FormFieldSelect
+              form={form}
+              name="category"
+              className="min-w-[13rem]"
+              options={[
+                { label: "이메일", value: "email" },
+                { label: "이름", value: "name" },
+              ]}
+            />
             <FormFieldInput
               form={form}
-              name={searchType as "email" | "name"}
+              name={"keyword"}
               placeholder="검색어를 입력해주세요."
               elSize={"sm"}
               className="w-full"
+              defaultValue={router.query.keyword}
             />
           </FormLow>
           <FormLow label="노출여부">
@@ -90,7 +79,14 @@ const FormContainer = ({
           검색
           <Icon type="search" />
         </Button>
-        <Button variant={"secondary2"} size={"md"} onClick={() => {}}>
+        <Button
+          variant={"secondary2"}
+          size={"md"}
+          onClick={() => {
+            form.reset();
+            router.replace("/app/splash");
+          }}
+        >
           <Icon type="return" />
         </Button>
       </form>

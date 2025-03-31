@@ -5,8 +5,9 @@ import {
 import { FormSchemaType } from "@/pages/app/splash";
 
 const splashApi = {
-  getSplash: async () => {
-    const res = await fetch("/api/splash");
+  getSplash: async (query: FormSchemaType) => {
+    const queryString = new URLSearchParams(query).toString();
+    const res = await fetch(`http://localhost:3000/api/splash?${queryString}`);
     return res.json();
   },
   createSplash: async (data: SplashTableData) => {
@@ -17,7 +18,7 @@ const splashApi = {
     return res.json();
   },
   updateSplash: async (id: string, data: SplashTableUpdateData) => {
-    const res = await fetch(`/api/splash`, {
+    const res = await fetch(`http://localhost:3000/api/splash`, {
       method: "PUT",
       body: JSON.stringify({
         id,
@@ -27,7 +28,7 @@ const splashApi = {
     return res.json();
   },
   deleteSplash: async (id: string) => {
-    const res = await fetch(`/api/splash`, {
+    const res = await fetch(`http://localhost:3000/api/splash`, {
       method: "DELETE",
       body: JSON.stringify({ id }),
     });
@@ -35,7 +36,7 @@ const splashApi = {
   },
   searchSplash: async (data: FormSchemaType) => {
     const queryString = new URLSearchParams(data).toString();
-    const res = await fetch(`/api/splash?${queryString}`);
+    const res = await fetch(`http://localhost:3000/api/splash?${queryString}`);
     return res.json();
   },
 };

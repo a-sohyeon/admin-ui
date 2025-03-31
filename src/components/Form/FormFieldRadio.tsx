@@ -36,7 +36,11 @@ export default function FormFieldRadio<T extends FieldValues, U>({
             {label && <FormLabel required={required}>{label}</FormLabel>}
 
             <FormControl>
-              <RadioGroup onValueChange={field.onChange}>
+              <RadioGroup
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                value={field.value}
+              >
                 {options.map((option) => (
                   <FormItem
                     className="flex items-center gap-[.8rem]"

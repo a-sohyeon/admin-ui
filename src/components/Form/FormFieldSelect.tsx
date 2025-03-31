@@ -37,6 +37,7 @@ export default function FormFieldSelect<T extends FieldValues, U>({
   description,
   elSize,
   options,
+  className,
   ...props
 }: FormFieldSelectProps<T, U>) {
   return (
@@ -64,6 +65,7 @@ export default function FormFieldSelect<T extends FieldValues, U>({
                   <SelectTrigger
                     elSize={elSize}
                     variant={error ? "error" : "default"}
+                    className={className}
                   >
                     <SelectValue placeholder={placeholder} />
                   </SelectTrigger>

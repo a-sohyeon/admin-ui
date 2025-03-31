@@ -8,21 +8,29 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { splashApi } from "@/lib/http/api";
-import { useState } from "react";
+import { GetServerSidePropsContext } from "next";
 
-export const getServerSideProps = async () => {
-  const res = await fetch("http://localhost:3000/api/splash", {
-    method: "GET",
-  });
-  const data = await res.json();
-  return {
-    props: { data },
-  };
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  try {
+    const data = await splashApi.getSplash(context.query as FormSchemaType);
+    return {
+      props: { data },
+    };
+  } catch (error) {
+    console.error("Failed to fetch splash data:", error);
+    return {
+      props: { data: [] },
+    };
+  }
 };
 
 const FormSchema = z.object({
-  email: z.string().optional(),
-  name: z.string().optional(),
+  keyword: z.string().min(0, { message: "검색어를 입력해주세요." }).optional(),
+  category: z.enum(["email", "name"], {
+    message: "카테고리를 선택해주세요.",
+  }),
   status: z
     .enum(["all", "active", "inactive"], {
       message: "노출여부를 선택해주세요.",
@@ -33,17 +41,15 @@ const FormSchema = z.object({
 export type FormSchemaType = z.infer<typeof FormSchema>;
 
 export default function Page({ data }: { data: TableData[] }) {
-  const [tableData, setTableData] = useState<TableData[]>(data);
-
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(FormSchema),
     mode: "onChange",
+    defaultValues: {
+      category: "email",
+      keyword: "",
+      status: "all",
+    },
   });
-
-  const handleSubmit = async (data: FormSchemaType) => {
-    const res = await splashApi.searchSplash(data);
-    setTableData(res);
-  };
 
   return (
     <>
@@ -55,9 +61,9 @@ export default function Page({ data }: { data: TableData[] }) {
       </Title>
 
       <div className="rounded-lg bg-white py-[1.6rem] px-[4rem] mb-[1.6rem]">
-        <FormContainer form={form} handleSubmit={handleSubmit} />
+        <FormContainer form={form} />
       </div>
-      <TableContainer data={tableData} />
+      <TableContainer data={data} />
     </>
   );
 }
