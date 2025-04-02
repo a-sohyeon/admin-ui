@@ -27,7 +27,7 @@ const Counter = React.forwardRef<HTMLInputElement, CounterProps<FieldValues>>(
         <Button
           variant={"outline"}
           type="button"
-          size={"xs"}
+          size={"sm"}
           className="p-[.7rem] rounded-full disabled:text-gray-4 disabled:bg-gray-0"
           disabled={disabled}
           onClick={() => {
@@ -40,9 +40,10 @@ const Counter = React.forwardRef<HTMLInputElement, CounterProps<FieldValues>>(
         <Input
           type="number"
           className={cn(
-            "text-center p-0 w-[3.2rem] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+            "text-center p-0 w-max [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
             error && "border-b border-states-red"
           )}
+          elSize={"sm"}
           disabled={disabled}
           value={value ?? 0}
           onChange={(e) => {
@@ -53,13 +54,16 @@ const Counter = React.forwardRef<HTMLInputElement, CounterProps<FieldValues>>(
               return onChange(max);
             onChange(newValue);
           }}
+          handleClear={() => {
+            onChange(0);
+          }}
           ref={ref}
           {...props}
         />
         <Button
           variant={"outline"}
           type="button"
-          size={"xs"}
+          size={"sm"}
           className="p-[.7rem] rounded-full disabled:text-gray-4 disabled:bg-gray-0"
           disabled={disabled}
           onClick={() => {

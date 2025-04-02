@@ -3,6 +3,15 @@
 import { Icon } from "@/components/Icons";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { ColumnDef } from "@tanstack/react-table";
 
@@ -76,18 +85,40 @@ export const columns: ColumnDef<SplashTableData>[] = [
   {
     accessorKey: "isDeleted",
     header: () => <div>삭제</div>,
-    cell: ({ row, table }) => (
-      <Button
-        variant={"secondary3"}
-        type="button"
-        size={"sm"}
-        onClick={() => {
-          table.options.meta?.onDeleteData?.(row.original.id);
-        }}
-      >
-        삭제
-        <Icon type="trash" />
-      </Button>
-    ),
+    cell: ({ row, table }) => {
+      return (
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant={"secondary3"} type="button" size={"sm"}>
+              삭제
+              <Icon type="trash" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>삭제하시겠습니까?</DialogTitle>
+            </DialogHeader>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant={"secondary2"}>
+                  취소
+                </Button>
+              </DialogClose>
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant={"secondary1"}
+                  onClick={() => {
+                    table.options.meta?.onDeleteData?.(row.original.id);
+                  }}
+                >
+                  삭제
+                </Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      );
+    },
   },
 ];

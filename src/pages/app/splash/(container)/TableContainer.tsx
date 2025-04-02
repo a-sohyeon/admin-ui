@@ -40,7 +40,13 @@ const TableContainer = ({ data }: { data: SplashTableData[] }) => {
     try {
       const res = await splashApi.updateSplash(id, data);
       if (res.success) {
-        setTableData(res.data);
+        const query = {
+          category: params.get("category") ?? "email",
+          keyword: params.get("keyword") ?? "",
+          status: params.get("status") ?? "all",
+        } as FormSchemaType;
+        const data = await splashApi.getSplash(query);
+        setTableData(data);
       } else {
         setTableData([]);
       }
@@ -48,7 +54,6 @@ const TableContainer = ({ data }: { data: SplashTableData[] }) => {
       console.error("Failed to update status:", error);
     }
   };
-
   const handleDataDelete = async (id: string) => {
     try {
       const res = await splashApi.deleteSplash(id);

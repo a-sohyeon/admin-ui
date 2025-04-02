@@ -2,10 +2,16 @@
 import TABLE_DATA from "@/consts/TableData";
 import type { NextApiRequest, NextApiResponse } from "next";
 
+export const config = {
+  api: {
+    externalResolver: true,
+  },
+};
+
 let data = [...TABLE_DATA];
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  const _req = req.body ? JSON.parse(req.body) : null;
+  // const _req = req.body ? JSON.parse(req.body) : null;
   const query = req.query;
   let filteredData = [...data];
 
@@ -46,27 +52,28 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       res.status(200).json(filteredData);
       break;
     case "POST":
-      res.status(200).json([...data, req.body]);
+      data = [req.body.data, ...data];
+      res.status(200).json({ data, success: true });
       break;
     case "PUT":
-      if (_req.id && _req.data) {
-        console.log(_req.data?.status);
+      if (req.body.id && req.body.data) {
+        console.log(req.body.data?.status);
 
         data = data.map((item) =>
-          item.id === _req.id
+          item.id === req.body.id
             ? {
                 ...item,
                 status:
-                  _req.data?.status !== undefined
-                    ? _req.data?.status
+                  req.body.data?.status !== undefined
+                    ? req.body.data?.status
                     : item.status,
                 amount:
-                  _req.data?.amount !== undefined
-                    ? _req.data?.amount
+                  req.body.data?.amount !== undefined
+                    ? req.body.data?.amount
                     : item.amount,
                 email:
-                  _req.data?.email !== undefined
-                    ? _req.data?.email
+                  req.body.data?.email !== undefined
+                    ? req.body.data?.email
                     : item.email,
               }
             : item
@@ -81,9 +88,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       }
       break;
     case "DELETE":
-      if (_req.id) {
-        data = data.filter((item) => item.id !== _req.id);
-        res.status(200).json({ data, success: true });
+      if (req.body.id) {
+        data = data.filter((item) => item.id !== req.body.id);
+        const time = 1000 + Math.random() * 5000;
+        setTimeout(() => {
+          res.status(200).json({ data, success: true });
+        }, time);
       } else {
         res.status(400).json({ error: "Invalid request" });
       }

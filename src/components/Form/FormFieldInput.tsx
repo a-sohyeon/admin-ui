@@ -13,7 +13,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const InputWrapVariants = cva(
-  "flex items-center w-full h-[4rem] transition-colors border rounded-sm border-input border-gray-2 bg-white focus-within:border-primary-cyan",
+  "flex items-center w-full transition-colors border rounded-sm border-input border-gray-2 bg-white focus-within:border-primary-cyan",
   {
     variants: {
       variant: {

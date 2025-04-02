@@ -1,6 +1,4 @@
-import { Icon } from "@/components/Icons";
 import { Title } from "@/components/Title";
-import { Button } from "@/components/ui/button";
 import FormContainer from "./(container)/FormContainer";
 import { TableData } from "@/consts/TableData";
 import TableContainer from "./(container)/TableContainer";
@@ -9,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { splashApi } from "@/lib/http/api";
 import { GetServerSidePropsContext } from "next";
+import DrawerContainer from "./(container)/DrawerContainer";
 
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
@@ -54,10 +53,7 @@ export default function Page({ data }: { data: TableData[] }) {
   return (
     <>
       <Title className="flex justify-between w-full">
-        <Button variant={"default"} type="button" size={"lg"}>
-          신규등록
-          <Icon type="plus" />
-        </Button>
+        <DrawerContainer />
       </Title>
 
       <div className="rounded-lg bg-white py-[1.6rem] px-[4rem] mb-[1.6rem]">
