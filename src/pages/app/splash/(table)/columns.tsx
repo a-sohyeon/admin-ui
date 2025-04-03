@@ -7,6 +7,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -69,6 +70,10 @@ export const columns: ColumnDef<SplashTableData>[] = [
     cell: ({ row, table }) => (
       <Switch
         checked={row.original.status}
+        disabled={
+          table.options.state.deleteState?.id.includes(row.original.id) &&
+          table.options.state.deleteState?.status
+        }
         onCheckedChange={() => {
           table.options.meta?.onUpdateData?.(row.original.id, {
             status: !row.original.status,
@@ -89,7 +94,15 @@ export const columns: ColumnDef<SplashTableData>[] = [
       return (
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant={"secondary3"} type="button" size={"sm"}>
+            <Button
+              variant={"secondary3"}
+              type="button"
+              size={"sm"}
+              disabled={
+                table.options.state.deleteState?.id.includes(row.original.id) &&
+                table.options.state.deleteState?.status
+              }
+            >
               삭제
               <Icon type="trash" />
             </Button>
@@ -97,6 +110,9 @@ export const columns: ColumnDef<SplashTableData>[] = [
           <DialogContent>
             <DialogHeader>
               <DialogTitle>삭제하시겠습니까?</DialogTitle>
+              <DialogDescription>
+                삭제된 스플래시는 복구할 수 없습니다.
+              </DialogDescription>
             </DialogHeader>
             <DialogFooter>
               <DialogClose asChild>
@@ -109,7 +125,7 @@ export const columns: ColumnDef<SplashTableData>[] = [
                   type="button"
                   variant={"secondary1"}
                   onClick={() => {
-                    table.options.meta?.onDeleteData?.(row.original.id);
+                    table.options.meta?.onDeleteData?.([row.original.id]);
                   }}
                 >
                   삭제

@@ -7,6 +7,7 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
+  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -58,7 +59,6 @@ export default function DrawerContainer() {
     try {
       const res = await splashApi.createSplash(_data);
       if (res.success) {
-        console.log(_data);
         form.reset();
         router.replace("/app/splash");
       }
@@ -80,6 +80,7 @@ export default function DrawerContainer() {
           <form onSubmit={form.handleSubmit(handleSubmit)}>
             <DrawerHeader>
               <DrawerTitle>신규등록</DrawerTitle>
+              <DrawerDescription>신규 스플래시를 등록합니다.</DrawerDescription>
             </DrawerHeader>
             <div className="flex flex-col gap-[3.2rem] py-[2.4rem]">
               <FormFieldInput

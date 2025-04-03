@@ -1,7 +1,7 @@
 import {
   SplashTableData,
   SplashTableUpdateData,
-} from "@/pages/app/splash/(container)/columns";
+} from "@/pages/app/splash/(table)/columns";
 import { FormSchemaType } from "@/pages/app/splash";
 import axios from "axios";
 
@@ -30,7 +30,7 @@ const splashApi = {
     });
     return res.data;
   },
-  deleteSplash: async (id: string) => {
+  deleteSplash: async (id: string[]) => {
     const res = await axios({
       method: "DELETE",
       data: { id },

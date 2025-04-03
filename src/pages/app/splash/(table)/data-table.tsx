@@ -25,14 +25,18 @@ import {
   ColumnFiltersState,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import { TablePagination } from "./table-pagination";
+import { TablePagination } from "@/components/Table/table-pagination";
 
 export interface DataTableProps<TData, TValue> {
   data: TData[];
   columns: ColumnDef<TData, TValue>[];
   onUpdateData?: (id: string, data: Partial<TData>) => Promise<void>;
-  onDeleteData?: (id: string) => Promise<void>;
+  onDeleteData?: (id: string[]) => Promise<void>;
   onRowCountChange?: (count: number) => void;
+  deleteState?: {
+    id: string[];
+    status: boolean;
+  };
 }
 
 export interface DataTableRef<TData> {
@@ -47,6 +51,7 @@ const DataTable = <TData, TValue>(
     onUpdateData,
     onDeleteData,
     onRowCountChange,
+    deleteState,
   }: DataTableProps<TData, TValue>,
   ref: React.ForwardedRef<DataTableRef<TData>>
 ) => {
@@ -72,6 +77,7 @@ const DataTable = <TData, TValue>(
       columnFilters, // 열 필터 상태
       rowSelection, // 행 선택 상태
       pagination, // 페이지네이션 상태
+      deleteState, // 삭제 상태
     },
     meta: {
       onUpdateData, // 데이터 업데이트 함수

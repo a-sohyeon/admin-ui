@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import DataTable, { DataTableRef } from "@/components/Table/data-table";
+import DataTable, { DataTableRef } from "../(table)/data-table";
 import { splashApi } from "@/lib/http/api";
 
 import {
@@ -11,7 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { columns, SplashTableData, SplashTableUpdateData } from "./columns";
+import {
+  columns,
+  SplashTableData,
+  SplashTableUpdateData,
+} from "../(table)/columns";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/Icons";
 import { useSearchParams } from "next/navigation";
@@ -22,6 +26,13 @@ const TableContainer = ({ data }: { data: SplashTableData[] }) => {
   const [tableData, setTableData] = useState<SplashTableData[]>(data);
   const tableRef = useRef<DataTableRef<SplashTableData>>(null);
   const [rowCount, setRowCount] = useState<number>(tableData.length);
+  const [deleteState, setDeleteState] = useState<{
+    id: string[];
+    status: boolean;
+  }>({
+    id: [],
+    status: false,
+  });
 
   const handleFilterState = (value: string) => {
     if (value === "all") {
@@ -54,7 +65,9 @@ const TableContainer = ({ data }: { data: SplashTableData[] }) => {
       console.error("Failed to update status:", error);
     }
   };
-  const handleDataDelete = async (id: string) => {
+
+  const handleDataDelete = async (id: string[]) => {
+    setDeleteState({ id: [...deleteState.id, ...id], status: true });
     try {
       const res = await splashApi.deleteSplash(id);
       if (res.success) {
@@ -67,19 +80,29 @@ const TableContainer = ({ data }: { data: SplashTableData[] }) => {
         setTableData(data);
       } else {
         setTableData([]);
+        throw new Error("Failed to delete status");
       }
     } catch (error) {
       console.error("Failed to delete status:", error);
+      setDeleteState({
+        id: [],
+        status: false,
+      });
+    } finally {
+      setDeleteState({
+        id: [],
+        status: false,
+      });
     }
   };
 
   const handleDeleteSelected = () => {
     const selectedRows = tableRef.current?.table.getSelectedRowModel().rows;
+
     if (selectedRows) {
-      selectedRows.forEach((row) => {
-        handleDataDelete(row.original.id);
-        tableRef.current?.table.toggleAllPageRowsSelected(false);
-      });
+      const ids = selectedRows.map((row) => row.original.id);
+      handleDataDelete([...ids]);
+      tableRef.current?.table.toggleAllPageRowsSelected(false);
     }
   };
 
@@ -126,6 +149,7 @@ const TableContainer = ({ data }: { data: SplashTableData[] }) => {
         onUpdateData={handleDataUpdate}
         onDeleteData={handleDataDelete}
         onRowCountChange={setRowCount}
+        deleteState={deleteState}
       />
     </div>
   );

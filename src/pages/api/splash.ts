@@ -88,8 +88,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       }
       break;
     case "DELETE":
-      if (req.body.id) {
-        data = data.filter((item) => item.id !== req.body.id);
+      if (req.body.id.length > 0) {
+        data = data.filter((item) => !req.body.id.includes(item.id));
         const time = 1000 + Math.random() * 5000;
         setTimeout(() => {
           res.status(200).json({ data, success: true });
