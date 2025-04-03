@@ -36,7 +36,13 @@ const FormSchema = z.object({
 });
 
 type FormSchemaType = z.infer<typeof FormSchema>;
-export default function DrawerContainer() {
+export default function DrawerContainer({
+  startLoading,
+  stopLoading,
+}: {
+  startLoading: () => void;
+  stopLoading: () => void;
+}) {
   const router = useRouter();
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(FormSchema),
@@ -46,6 +52,7 @@ export default function DrawerContainer() {
   });
 
   const handleSubmit = async (data: FormSchemaType) => {
+    startLoading();
     const _data = {
       ...data,
       id: Math.random().toString(36).substring(2, 10),
@@ -64,6 +71,8 @@ export default function DrawerContainer() {
       }
     } catch (error) {
       console.error("Failed to create splash:", error);
+    } finally {
+      stopLoading();
     }
   };
 

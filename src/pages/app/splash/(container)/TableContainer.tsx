@@ -20,8 +20,15 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/Icons";
 import { useSearchParams } from "next/navigation";
 import { FormSchemaType } from "..";
+import { Loader2 } from "lucide-react";
 
-const TableContainer = ({ data }: { data: SplashTableData[] }) => {
+const TableContainer = ({
+  data,
+  isLoading,
+}: {
+  data: SplashTableData[];
+  isLoading: boolean;
+}) => {
   const params = useSearchParams();
   const [tableData, setTableData] = useState<SplashTableData[]>(data);
   const tableRef = useRef<DataTableRef<SplashTableData>>(null);
@@ -111,7 +118,7 @@ const TableContainer = ({ data }: { data: SplashTableData[] }) => {
   }, [data]);
 
   return (
-    <div className="flex flex-col gap-[1.6rem] rounded-lg bg-white py-[1.6rem]">
+    <div className="flex flex-col gap-[1.6rem] rounded-lg bg-white py-[1.6rem] flex-1">
       <div className="flex justify-between items-end pl-[2.4rem] pr-[4rem]">
         <p className="text-[1.6rem] font-bold">
           총 <span className="text-states-red">{rowCount}</span>건
@@ -142,15 +149,21 @@ const TableContainer = ({ data }: { data: SplashTableData[] }) => {
           </Select>
         </div>
       </div>
-      <DataTable
-        data={tableData}
-        columns={columns}
-        ref={tableRef}
-        onUpdateData={handleDataUpdate}
-        onDeleteData={handleDataDelete}
-        onRowCountChange={setRowCount}
-        deleteState={deleteState}
-      />
+      {isLoading ? (
+        <div className="flex justify-center items-center h-full">
+          <Loader2 className="animate-spin" />
+        </div>
+      ) : (
+        <DataTable
+          data={tableData}
+          columns={columns}
+          ref={tableRef}
+          onUpdateData={handleDataUpdate}
+          onDeleteData={handleDataDelete}
+          onRowCountChange={setRowCount}
+          deleteState={deleteState}
+        />
+      )}
     </div>
   );
 };

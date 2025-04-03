@@ -53,7 +53,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       break;
     case "POST":
       data = [req.body.data, ...data];
-      res.status(200).json({ data, success: true });
+      const time = 1000 + Math.random() * 5000;
+      setTimeout(() => {
+        res.status(200).json({ data, success: true });
+      }, time);
       break;
     case "PUT":
       if (req.body.id && req.body.data) {

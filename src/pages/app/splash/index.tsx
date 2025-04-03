@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { splashApi } from "@/lib/http/api";
 import { GetServerSidePropsContext } from "next";
 import DrawerContainer from "./(container)/DrawerContainer";
+import { useLoading } from "@/hooks/use-loading";
 
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
@@ -40,6 +41,7 @@ const FormSchema = z.object({
 export type FormSchemaType = z.infer<typeof FormSchema>;
 
 export default function Page({ data }: { data: TableData[] }) {
+  const { isLoading, startLoading, stopLoading } = useLoading();
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(FormSchema),
     mode: "onChange",
@@ -50,16 +52,21 @@ export default function Page({ data }: { data: TableData[] }) {
     },
   });
 
+  console.log(isLoading);
+
   return (
     <>
       <Title className="flex justify-between w-full">
-        <DrawerContainer />
+        <DrawerContainer
+          startLoading={startLoading}
+          stopLoading={stopLoading}
+        />
       </Title>
 
       <div className="rounded-lg bg-white py-[1.6rem] px-[4rem] mb-[1.6rem]">
         <FormContainer form={form} />
       </div>
-      <TableContainer data={data} />
+      <TableContainer data={data} isLoading={isLoading} />
     </>
   );
 }
