@@ -42,6 +42,7 @@ export type FormSchemaType = z.infer<typeof FormSchema>;
 
 export default function Page({ data }: { data: TableData[] }) {
   const { isLoading, startLoading, stopLoading } = useLoading();
+
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(FormSchema),
     mode: "onChange",
@@ -51,8 +52,6 @@ export default function Page({ data }: { data: TableData[] }) {
       status: "all",
     },
   });
-
-  console.log(isLoading);
 
   return (
     <>

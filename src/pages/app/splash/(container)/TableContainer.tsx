@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import DataTable, { DataTableRef } from "../(table)/data-table";
 import { splashApi } from "@/lib/http/api";
 
@@ -21,6 +21,7 @@ import { Icon } from "@/components/Icons";
 import { useSearchParams } from "next/navigation";
 import { FormSchemaType } from "..";
 import { Loader2 } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const TableContainer = ({
   data,
@@ -30,15 +31,47 @@ const TableContainer = ({
   isLoading: boolean;
 }) => {
   const params = useSearchParams();
-  const [tableData, setTableData] = useState<SplashTableData[]>(data);
   const tableRef = useRef<DataTableRef<SplashTableData>>(null);
-  const [rowCount, setRowCount] = useState<number>(tableData.length);
+  const [rowCount, setRowCount] = useState<number>(data.length);
   const [deleteState, setDeleteState] = useState<{
     id: string[];
     status: boolean;
   }>({
     id: [],
     status: false,
+  });
+
+  const queryClient = useQueryClient();
+
+  const query = {
+    category: params.get("category") ?? "email",
+    keyword: params.get("keyword") ?? "",
+    status: params.get("status") ?? "all",
+  } as FormSchemaType;
+
+  const { data: splashData } = useQuery({
+    queryKey: ["splash", query],
+    queryFn: () => splashApi.getSplash(query),
+    initialData: data,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: SplashTableUpdateData }) =>
+      splashApi.updateSplash(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["splash"] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string[]) => splashApi.deleteSplash(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["splash"] });
+      setDeleteState({ id: [], status: false });
+    },
+    onError: () => {
+      setDeleteState({ id: [], status: false });
+    },
   });
 
   const handleFilterState = (value: string) => {
@@ -55,52 +88,12 @@ const TableContainer = ({
   };
 
   const handleDataUpdate = async (id: string, data: SplashTableUpdateData) => {
-    try {
-      const res = await splashApi.updateSplash(id, data);
-      if (res.success) {
-        const query = {
-          category: params.get("category") ?? "email",
-          keyword: params.get("keyword") ?? "",
-          status: params.get("status") ?? "all",
-        } as FormSchemaType;
-        const data = await splashApi.getSplash(query);
-        setTableData(data);
-      } else {
-        setTableData([]);
-      }
-    } catch (error) {
-      console.error("Failed to update status:", error);
-    }
+    updateMutation.mutate({ id, data });
   };
 
   const handleDataDelete = async (id: string[]) => {
     setDeleteState({ id: [...deleteState.id, ...id], status: true });
-    try {
-      const res = await splashApi.deleteSplash(id);
-      if (res.success) {
-        const query = {
-          category: params.get("category") ?? "email",
-          keyword: params.get("keyword") ?? "",
-          status: params.get("status") ?? "all",
-        } as FormSchemaType;
-        const data = await splashApi.getSplash(query);
-        setTableData(data);
-      } else {
-        setTableData([]);
-        throw new Error("Failed to delete status");
-      }
-    } catch (error) {
-      console.error("Failed to delete status:", error);
-      setDeleteState({
-        id: [],
-        status: false,
-      });
-    } finally {
-      setDeleteState({
-        id: [],
-        status: false,
-      });
-    }
+    deleteMutation.mutate(id);
   };
 
   const handleDeleteSelected = () => {
@@ -112,10 +105,6 @@ const TableContainer = ({
       tableRef.current?.table.toggleAllPageRowsSelected(false);
     }
   };
-
-  useEffect(() => {
-    setTableData(data);
-  }, [data]);
 
   return (
     <div className="flex flex-col gap-[1.6rem] rounded-lg bg-white py-[1.6rem] flex-1">
@@ -133,13 +122,9 @@ const TableContainer = ({
             선택 삭제
             <Icon type="trash" />
           </Button>
-          <Select
-            onValueChange={(value) => {
-              handleFilterState(value);
-            }}
-          >
+          <Select onValueChange={handleFilterState}>
             <SelectTrigger elSize={"sm"} className="min-w-[10rem]">
-              <SelectValue placeholder="선택" />
+              <SelectValue placeholder="노출여부" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">전체</SelectItem>
@@ -155,7 +140,7 @@ const TableContainer = ({
         </div>
       ) : (
         <DataTable
-          data={tableData}
+          data={splashData}
           columns={columns}
           ref={tableRef}
           onUpdateData={handleDataUpdate}

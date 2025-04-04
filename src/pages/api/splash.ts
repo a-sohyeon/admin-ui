@@ -11,7 +11,6 @@ export const config = {
 let data = [...TABLE_DATA];
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  // const _req = req.body ? JSON.parse(req.body) : null;
   const query = req.query;
   let filteredData = [...data];
 
@@ -21,7 +20,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         case "email":
           filteredData = filteredData.filter((item) => {
             if (
-              item.email.toLocaleLowerCase().includes(query.keyword as string)
+              item.email
+                .toLocaleLowerCase()
+                .includes((query.keyword as string) || "")
             ) {
               return true;
             }
@@ -31,7 +32,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         case "name":
           filteredData = filteredData.filter((item) => {
             if (
-              item.name.toLocaleLowerCase().includes(query.keyword as string)
+              item.name
+                .toLocaleLowerCase()
+                .includes((query.keyword as string) || "")
             ) {
               return item;
             }
@@ -42,11 +45,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
           break;
       }
 
-      if (query.status === "active") {
-        filteredData = filteredData.filter((item) => item.status === true);
-      }
-      if (query.status === "inactive") {
-        filteredData = filteredData.filter((item) => item.status === false);
+      if (query.status !== "all") {
+        filteredData = filteredData.filter(
+          (item) => item.status === (query.status === "active")
+        );
       }
 
       res.status(200).json(filteredData);

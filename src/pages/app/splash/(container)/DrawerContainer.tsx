@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/form";
 import { splashApi } from "@/lib/http/api";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -36,6 +37,7 @@ const FormSchema = z.object({
 });
 
 type FormSchemaType = z.infer<typeof FormSchema>;
+
 export default function DrawerContainer({
   startLoading,
   stopLoading,
@@ -51,29 +53,33 @@ export default function DrawerContainer({
     },
   });
 
+  const queryClient = useQueryClient();
+
+  const createMutation = useMutation({
+    mutationFn: (data: FormSchemaType) => {
+      const _data = {
+        ...data,
+        id: Math.random().toString(36).substring(2, 10),
+        status: data.status === "active",
+      };
+      return splashApi.createSplash(_data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["splash"] });
+      form.reset();
+      router.replace("/app/splash");
+    },
+    onSettled: () => {
+      stopLoading();
+    },
+    onError: (error) => {
+      console.error("Failed to create splash:", error);
+    },
+  });
+
   const handleSubmit = async (data: FormSchemaType) => {
     startLoading();
-    const _data = {
-      ...data,
-      id: Math.random().toString(36).substring(2, 10),
-      status:
-        data.status === "active"
-          ? true
-          : data.status === "inactive"
-          ? false
-          : false,
-    };
-    try {
-      const res = await splashApi.createSplash(_data);
-      if (res.success) {
-        form.reset();
-        router.replace("/app/splash");
-      }
-    } catch (error) {
-      console.error("Failed to create splash:", error);
-    } finally {
-      stopLoading();
-    }
+    createMutation.mutate(data);
   };
 
   return (

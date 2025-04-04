@@ -34,6 +34,7 @@ const FormContainer = ({ form }: { form: UseFormReturn<FormSchemaType> }) => {
         params.set(key, value);
       }
     });
+
     router.replace(`/app/splash?${params.toString()}`);
   };
 
